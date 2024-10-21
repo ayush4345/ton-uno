@@ -27,7 +27,7 @@ export function Providers({ children }) {
         },
       }}
     >
-      <TonConnectUIProvider manifestUrl="https://<YOUR_APP_URL>/tonconnect-manifest.json">
+      <TonConnectUIProvider manifestUrl="https://ton-uno.vercel.app/tonconnect-manifest.json">
         <QueryClientProvider client={queryClient}>
           <WagmiProvider config={config}>
             {children}

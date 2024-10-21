@@ -12,6 +12,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { TonConnectButton } from '@tonconnect/ui-react';
 
 // ShareLink component - used for sharing a match link
 export default function AddFundPopUp({ openHandler, balance, setBalance }) {
@@ -108,6 +109,7 @@ export default function AddFundPopUp({ openHandler, balance, setBalance }) {
                     </Dialog>
                 </div>
                 <div className='mt-2 text-gray-200'>select tokens you want to buy</div>
+                <TonConnectButton />
             </div>
         </FrameBox>
     )

@@ -54,8 +54,8 @@ export default function TokenInfoBar() {
                 <Link href="/play" className="text-white font-semibold text-lg hover:underline p-1 rounded-md cursor-pointer">Play</Link >
                 {/* <Link href="/create" className="text-white font-semibold text-lg shadow-md hover:underline p-1 rounded-md cursor-pointer">Create</Link >
                 <Link href="/game/join" className="text-white font-semibold text-lg shadow-md hover:underline p-1 rounded-md cursor-pointer">Join</Link > */}
-                {/* <span className="flex items-center gap-3 border-[1px] p-2 px-4 rounded-xl">
-                    <div className="text-white font-semibold text-lg">{tokenAmount} UNO</div>
+                <span className="flex items-center gap-3 border-[1px] p-2 px-4 rounded-xl">
+                    <div className="text-white font-semibold text-lg">{tokenAmount} $ENERGY</div>
                     <Dialog open={open} onOpenChange={(state) => setOpen(state)}>
                         <DialogTrigger asChild>
                             <StyledButton className='bg-[#c69532] text-xs'><span className="flex items-center gap-3"><IoMdAdd />Add Fund</span> </StyledButton>
@@ -64,7 +64,7 @@ export default function TokenInfoBar() {
                             <AddFundPopUp openHandler={openHandler} accounts={accounts} balance={balance} setBalance={setBalance} />
                         </DialogContent>
                     </Dialog>
-                </span> */}
+                </span>
                 <Avatar>
                     <AvatarImage src={`https://api.dicebear.com/8.x/notionists/svg`} alt="@user" />
                     <AvatarFallback>MD</AvatarFallback>
