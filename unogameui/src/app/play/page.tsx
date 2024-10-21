@@ -8,19 +8,19 @@ import { UnoGameContract } from '@/lib/types';
 import { getContract, getContractNew } from '@/lib/web3';
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { usePrivy } from '@privy-io/react-auth';
 import { useWriteContract } from 'wagmi';
 import UNOContractJson from '@/constants/UnoGame.json'
-import { createPublicClient, createWalletClient, http } from 'viem'
+import { TonConnectButton } from '@tonconnect/ui-react';
+import { useTonAddress } from '@tonconnect/ui-react';
 
 const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
 
 export default function PlayGame() {
 
     const { address, status } = useAccount()
-    const { ready, user, authenticated, login, connectWallet, logout, linkWallet } = usePrivy();
+    const userFriendlyAddress = useTonAddress();
     const [open, setOpen] = useState(false)
     const [createLoading, setCreateLoading] = useState(false)
     const [joinLoading, setJoinLoading] = useState(false)
@@ -152,7 +152,7 @@ export default function PlayGame() {
             setAccount(null)
             setContract(null)
         }
-    }, [status, address, authenticated])
+    }, [status, address, userFriendlyAddress])
 
     return (
         <div className='relative'>
@@ -167,7 +167,8 @@ export default function PlayGame() {
                         <div className='relative text-center flex justify-center'>
                             <img src='/login-button-bg.png' />
                             <div className='left-1/2 -translate-x-1/2 absolute bottom-4'>
-                                <StyledButton disabled={!ready} data-testid="connect" roundedStyle='rounded-full' className='bg-[#ff9000] text-2xl' onClick={login}>{authenticated ? `Connected Wallet` : `Connect Wallet`}</StyledButton>
+                                {/* <StyledButton disabled={!ready} data-testid="connect" roundedStyle='rounded-full' className='bg-[#ff9000] text-2xl' onClick={login}>{authenticated ? `Connected Wallet` : `Connect Wallet`}</StyledButton> */}
+                                <TonConnectButton />
                             </div>
                         </div>
                         : <>
