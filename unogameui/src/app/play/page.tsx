@@ -96,7 +96,7 @@ export default function PlayGame() {
                 const hexFromTonAddress= decodeBase64ToHex(userFriendlyAddress as string)
                 const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
 
-                const tx = await contract.createGame(bytesFromTonAddress as string | undefined)
+                const tx = await contract.createGame(bytesFromTonAddress as `0x${string}` | undefined)
                 console.log('Transaction hash:', tx.hash)
                 await tx.wait()
                 console.log('Game created successfully')
@@ -124,7 +124,7 @@ export default function PlayGame() {
                 const hexFromTonAddress= decodeBase64ToHex(userFriendlyAddress as string)
                 const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
 
-                const tx = await contract.joinGame(gameIdBigint, bytesFromTonAddress as string | undefined)
+                const tx = await contract.joinGame(gameIdBigint, bytesFromTonAddress as `0x${string}` | undefined)
                 console.log('Transaction hash:', tx.hash)
                 await tx.wait()
 
