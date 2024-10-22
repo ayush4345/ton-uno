@@ -301,7 +301,7 @@ function getNextPlayer(currentPlayer: string, playerHands: { [address: string]: 
 export function hashState(state: OffChainGameState): string {
   const abiCoder = ethers.AbiCoder.defaultAbiCoder();
   const encodedState = abiCoder.encode(
-    ['uint256', 'address[]', 'bool', 'uint256', 'uint256', 'uint256', 'bool', 'string', 'string', 'string', 'string', 'string', 'string', 'bool'],
+    ['uint256', 'bytes32[]', 'bool', 'uint256', 'uint256', 'uint256', 'bool', 'string', 'string', 'string', 'string', 'string', 'string', 'bool'],
     [
       state.id,
       state.players,
@@ -325,7 +325,7 @@ export function hashState(state: OffChainGameState): string {
 export function hashAction(action: Action): string {
   const abiCoder = ethers.AbiCoder.defaultAbiCoder();
   const encodedAction = abiCoder.encode(
-    ['string', 'address', 'string'],
+    ['string', 'bytes32', 'string'],
     [
       action.type,
       action.player,

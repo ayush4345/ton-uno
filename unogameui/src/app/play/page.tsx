@@ -8,18 +8,16 @@ import { UnoGameContract } from '@/lib/types';
 import { getContract, getContractNew } from '@/lib/web3';
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
-import { usePrivy } from '@privy-io/react-auth';
-import { useWriteContract } from 'wagmi';
 import UNOContractJson from '@/constants/UnoGame.json'
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonAddress } from '@tonconnect/ui-react';
+import { ethers } from 'ethers';
+import { decodeBase64ToHex } from '@/lib/utils';
 
 const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
 
 export default function PlayGame() {
 
-    const { address, status } = useAccount()
     const userFriendlyAddress = useTonAddress();
     const [open, setOpen] = useState(false)
     const [createLoading, setCreateLoading] = useState(false)
@@ -28,7 +26,6 @@ export default function PlayGame() {
     const [contract, setContract] = useState<UnoGameContract | null>(null)
     const [games, setGames] = useState<BigInt[]>([])
     const router = useRouter()
-    const { data, error, isError, isPending, writeContract } = useWriteContract();
 
     const contractABI = UNOContractJson.abi
 
@@ -95,7 +92,11 @@ export default function PlayGame() {
             try {
                 setCreateLoading(true)
                 console.log('Creating game...')
-                const tx = await contract.createGame(account as `0x${string}` | undefined)
+
+                const hexFromTonAddress= decodeBase64ToHex(userFriendlyAddress as string)
+                const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+
+                const tx = await contract.createGame(bytesFromTonAddress as string | undefined)
                 console.log('Transaction hash:', tx.hash)
                 await tx.wait()
                 console.log('Game created successfully')
@@ -119,7 +120,11 @@ export default function PlayGame() {
                 setJoinLoading(true)
                 console.log(`Joining game ${gameId.toString()}...`)
                 const gameIdBigint = BigInt(gameId.toString())
-                const tx = await contract.joinGame(gameIdBigint, account as `0x${string}` | undefined)
+
+                const hexFromTonAddress= decodeBase64ToHex(userFriendlyAddress as string)
+                const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+
+                const tx = await contract.joinGame(gameIdBigint, bytesFromTonAddress as string | undefined)
                 console.log('Transaction hash:', tx.hash)
                 await tx.wait()
 
@@ -134,11 +139,11 @@ export default function PlayGame() {
     }
 
     const setup = async () => {
-        if (address) {
+        if (userFriendlyAddress) {
             try {
                 const { contract } = await getContractNew()
                 setContract(contract)
-                setAccount(address)
+                setAccount(userFriendlyAddress)
             } catch (error) {
                 console.error('Failed to setup contract:', error)
             }
@@ -146,13 +151,14 @@ export default function PlayGame() {
     }
 
     useEffect(() => {
-        if (status === 'connected' && address) {
+        if (userFriendlyAddress) {
             setup()
         } else {
             setAccount(null)
             setContract(null)
         }
-    }, [status, address, userFriendlyAddress])
+    }, [userFriendlyAddress])
+    console.log('games', contract)
 
     return (
         <div className='relative'>
@@ -163,7 +169,7 @@ export default function PlayGame() {
                     <div className='absolute -left-8 right-8 -top-14 bottom-14 bg-no-repeat bg-[url("/card-0.png")] animate-pulse'></div>
                 </div>
                 <div className='absolute top-0 md:left-1/2 md:right-0 bottom-0 w-[calc(100%-2rem)] md:w-auto md:pr-20 py-12'>
-                    {!address ?
+                    {!userFriendlyAddress ?
                         <div className='relative text-center flex justify-center'>
                             <img src='/login-button-bg.png' />
                             <div className='left-1/2 -translate-x-1/2 absolute bottom-4'>

@@ -1,7 +1,6 @@
 'use client';
 
 import '@rainbow-me/rainbowkit/styles.css';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { config } from "../lib/wagmi";
 import { PrivyProvider } from '@privy-io/react-auth';

@@ -13,12 +13,15 @@ import StyledButton from '@/components/styled-button'
 import { convertBigIntsToStrings } from '@/lib/gameLogic'
 import { useAccount } from 'wagmi'
 import { Toaster, toast } from 'react-hot-toast'
+import { useTonAddress } from '@tonconnect/ui-react'
+import { decodeBase64ToHex } from '@/lib/utils'
+import { ethers } from 'ethers'
 
 const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
 
 const Room: React.FC = () => {
     const { id } = useParams()
-    const { address, status } = useAccount()
+    const userFriendlyAddress = useTonAddress();
     const [gameId, setGameId] = useState<bigint | null>(null)
     const accountRef = useRef<string | null>(null);
     const [account, setAccount] = useState<string | null>(null)
@@ -35,14 +38,19 @@ const Room: React.FC = () => {
 
     // Update accountRef and account whenever address changes
     useEffect(() => {
-        if (address) {
-            accountRef.current = address;
-            setAccount(address);
+        if (userFriendlyAddress) {
+            
+            const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
+            const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+            console.log(bytesFromTonAddress)
+
+            accountRef.current = bytesFromTonAddress;
+            setAccount(bytesFromTonAddress);
         } else {
             accountRef.current = null;
             setAccount(null);
         }
-    }, [address]);
+    }, [userFriendlyAddress]);
 
     useEffect(() => {
         if (!socket.current) {
@@ -106,20 +114,20 @@ const Room: React.FC = () => {
 
     useEffect(() => {
         const setup = async () => {
-            if (status === 'connected' && address) {
+            if (userFriendlyAddress) {
                 const { contract } = await getContractNew()
                 setContract(contract)
-                console.log('Account: ', address, 'contract: ', contract)
-                if (contract && id) {
+                console.log('Account: ', userFriendlyAddress, 'contract: ', contract)
+                if (contract && id && account) {
                     const bigIntId = BigInt(id as string)
                     setGameId(bigIntId)
                     console.log('Game ID: ', bigIntId)
-                    await fetchGameState(contract, bigIntId, address)
+                    await fetchGameState(contract, bigIntId, account)
                 }
             }
         }
         setup()
-    }, [id, status, address])
+    }, [id, userFriendlyAddress, account])
 
     useEffect(() => {
         if (playerToStart) {
