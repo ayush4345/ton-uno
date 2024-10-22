@@ -12,12 +12,24 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { TonClient, toNano } from "@ton/ton";
+import { DEX, pTON } from "@ston-fi/sdk";
+import { useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+
+
+const client = new TonClient({
+    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+});
+
+const dex = client.open(new DEX.v1.Router());
+
 
 // ShareLink component - used for sharing a match link
-export default function AddFundPopUp({ openHandler, balance, setBalance }) {
+export default function AddFundPopUp({ openHandler, address, balance, setBalance }) {
     const router = useRouter()
     const [amount, setAmount] = useState(0)
     const [contract, setContract] = useState(null)
+    const [tonConnectUI] = useTonConnectUI();
 
     const { toast } = useToast()
 
@@ -31,6 +43,28 @@ export default function AddFundPopUp({ openHandler, balance, setBalance }) {
     const ISSERVER = typeof window === "undefined";
 
     const [tokenAmount, setTokenAmount] = useState(0);
+
+    const swapTonToEnertime = async () => {
+        // swap 1 TON to Enertime but not less than 0.1 nano Enertime
+        const txParams = await dex.getSwapTonToJettonTxParams({
+            offerAmount: toNano("1"), // swap 1 TON
+            askJettonAddress: "EQAWqZE17MQgawh-Jo_Z8Wh_dGc1zpo7rL6r2w4L7XK_HygW", // Enertime
+            minAskAmount: toNano("0.1"), // but not less than 0.1 STON
+            proxyTon: new pTON.v1(),
+            userWalletAddress: address,
+        });
+
+        await tonConnectUI.sendTransaction({
+            validUntil: Date.now() + 1000000,
+            messages: [
+                {
+                    address: txParams.to.toString(),
+                    amount: txParams.value.toString(),
+                    payload: txParams.body?.toBoc().toString("base64"),
+                },
+            ],
+        });
+    }
 
     useEffect(() => {
         if (!ISSERVER) {
@@ -73,28 +107,21 @@ export default function AddFundPopUp({ openHandler, balance, setBalance }) {
                 <h4 className='text-3xl font-black'>Add Tokens to Your Fund</h4>
                 <p>Boost Your Stack, Elevate Your Game: Add Funds with Ease!</p>
                 <section className='flex gap-8 w-fit mx-auto mt-4 mb-4'>
-                    <button onClick={(event) => handleClick(event)}>
-                        <img src="/chips-blank-1.png" data-value="1" />
-                        <p>$ 1</p>
-                    </button>
-                    <button onClick={(event) => handleClick(event)}>
-                        <img src="/chips-blank-4.png" data-value="5" />
-                        <p>$ 5</p>
-                    </button>
-                    <button onClick={(event) => handleClick(event)}>
-                        <img src="/chips-blank-2.png" data-value="10" />
-                        <p>$ 10</p>
-                    </button>
-                    <button onClick={(event) => handleClick(event)}>
-                        <img src="/chips-blank-3.png" data-value="100" />
-                        <p>$ 100</p>
-                    </button>
+                    {balance && balance.map((item, index) => {
+                        return (
+                            <div key={index} className='flex flex-col items-center'>
+                                <img src={`/chips-blank-${index+1}.png`} data-value={item} />
+                                <p>$ {item.balance / 1_000_000_000}</p>
+                                <p>{item.jetton.name}</p>
+                            </div>
+                        )
+                    })}
                 </section>
-                <div className='flex bg-black/20 justify-between items-center text-white font-semibold rounded-lg' style={{ padding: "10px 20px" }}>
+                {/* <div className='flex bg-black/20 justify-between items-center text-white font-semibold rounded-lg' style={{ padding: "10px 20px" }}>
                     <div className='bg-black/30 rounded-lg flex items-center justify-between' style={{ padding: "5px 20px", width: "66%" }}><span>{amount}</span> {amount != 0 && <button onClick={() => setAmount(0)}><RxCross2 /></button>}</div>
                     <Dialog>
                         <DialogTrigger asChild>
-                            <StyledButton onClick={BuyToken}>Buy Token</StyledButton>
+                            <StyledButton onClick={swapTonToEnertime}>Buy Token</StyledButton>
                         </DialogTrigger>
                         <DialogContent className="w-fit">
                             <DialogHeader>
@@ -107,7 +134,7 @@ export default function AddFundPopUp({ openHandler, balance, setBalance }) {
                         </DialogContent>
                     </Dialog>
                 </div>
-                <div className='mt-2 text-gray-200'>select tokens you want to buy</div>
+                <div className='mt-2 text-gray-200'>select tokens you want to buy</div> */}
             </div>
         </FrameBox>
     )
