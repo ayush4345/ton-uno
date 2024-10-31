@@ -117,6 +117,7 @@ export default function AddFundPopUp({ openHandler, address, balance, setBalance
                         )
                     })}
                 </section>
+                <StyledButton onClick={swapTonToEnertime}>Swap Ton to Enertime</StyledButton>
                 {/* <div className='flex bg-black/20 justify-between items-center text-white font-semibold rounded-lg' style={{ padding: "10px 20px" }}>
                     <div className='bg-black/30 rounded-lg flex items-center justify-between' style={{ padding: "5px 20px", width: "66%" }}><span>{amount}</span> {amount != 0 && <button onClick={() => setAmount(0)}><RxCross2 /></button>}</div>
                     <Dialog>
