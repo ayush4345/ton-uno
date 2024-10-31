@@ -1,7 +1,7 @@
 'use client'
 
 import StyledButton from '@/components/styled-button'
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation';
 import TokenInfoBar from '@/components/TokenBar'
 import { UnoGameContract } from '@/lib/types';
@@ -13,6 +13,13 @@ import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { ethers } from 'ethers';
 import { decodeBase64ToHex } from '@/lib/utils';
+import { useTonConnect } from '@/hooks/useTonConnect';
+import { JettonMaster } from '@ton/ton';
+import { JettonWallet } from '@/wrappers/jettonWallet';
+import { calculateUsdtAmount } from '@/lib/common-helpers';
+import { JETTON_TRANSFER_GAS_FEES } from '../../../constants/fees.constants';
+import { INVOICE_WALLET_ADDRESS, USDT_MASTER_ADDRESS } from '../../../constants/common-constants';
+import { Address } from '@ton/core';
 
 const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
 
@@ -26,8 +33,7 @@ export default function PlayGame() {
     const [contract, setContract] = useState<UnoGameContract | null>(null)
     const [games, setGames] = useState<BigInt[]>([])
     const router = useRouter()
-
-    const contractABI = UNOContractJson.abi
+    const { sender, walletAddress, tonClient } = useTonConnect();
 
     const socket = useRef<Socket | null>(null);
 
@@ -80,12 +86,31 @@ export default function PlayGame() {
         }
     }, [contract, socket])
 
+    const handleCompletePayment = useCallback(async () => {
+        try {
+            if (!tonClient || !walletAddress) return;
+            console.log(Address.isAddress(USDT_MASTER_ADDRESS), walletAddress);
+            const jettonMaster = tonClient.open(JettonMaster.create(USDT_MASTER_ADDRESS));
+            const usersUsdtAddress = await jettonMaster.getWalletAddress(walletAddress);
 
-    const ISSERVER = typeof window === "undefined";
+            // creating and opening jetton wallet instance.
+            // First argument (provider) will be automatically substituted in methods, which names starts with 'get' or 'send'
+            const jettonWallet = tonClient.open(JettonWallet.createFromAddress(usersUsdtAddress));
 
-    const openHandler = () => {
-        setOpen(false)
-    }
+            await jettonWallet.sendTransfer(sender, {
+                fwdAmount: 1n,
+                comment: '',
+                jettonAmount: calculateUsdtAmount(2),
+                toAddress: INVOICE_WALLET_ADDRESS,
+                value: JETTON_TRANSFER_GAS_FEES,
+            });
+
+            console.log(`See transaction at https://testnet.tonviewer.com/${usersUsdtAddress.toString()}`);
+            createGame();
+        } catch (error) {
+            console.log('Error during transaction check:', error);
+        }
+    }, [tonClient, walletAddress, sender,]);
 
     const createGame = async () => {
         if (contract) {
@@ -93,7 +118,7 @@ export default function PlayGame() {
                 setCreateLoading(true)
                 console.log('Creating game...')
 
-                const hexFromTonAddress= decodeBase64ToHex(userFriendlyAddress as string)
+                const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
                 const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
 
                 const tx = await contract.createGame(bytesFromTonAddress as `0x${string}` | undefined)
@@ -121,7 +146,7 @@ export default function PlayGame() {
                 console.log(`Joining game ${gameId.toString()}...`)
                 const gameIdBigint = BigInt(gameId.toString())
 
-                const hexFromTonAddress= decodeBase64ToHex(userFriendlyAddress as string)
+                const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
                 const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
 
                 const tx = await contract.joinGame(gameIdBigint, bytesFromTonAddress as `0x${string}` | undefined)
@@ -178,11 +203,11 @@ export default function PlayGame() {
                             </div>
                         </div>
                         : <>
-                            <StyledButton onClick={() => createGame()} className='w-fit bg-[#00b69a] bottom-4 text-2xl my-3 mx-auto'>{createLoading == true ? 'Creating...' : 'Create Game Room'}</StyledButton>
+                            <StyledButton onClick={() => handleCompletePayment()} className='w-fit bg-[#00b69a] bottom-4 text-2xl my-3 mx-auto'>{createLoading == true ? 'Creating...' : 'Create Game Room'}</StyledButton>
                             <p className='text-white text-sm font-mono'>Note: Don't join the room where game is already started</p>
                             {joinLoading == true && <div className='text-white mt-2 text-2xl shadow-lg'>Wait, while we are joining your game room...</div>}
                             <h2 className="text-2xl font-bold mb-4 text-white">Active Game Rooms:</h2>
-                            <ScrollArea className="h-[620px] rounded-md border border-gray-200 bg-white p-4">
+                            <ScrollArea className="h-[530px] rounded-md border border-gray-200 bg-white p-4">
                                 <ul className="space-y-2">
                                     {games.toReversed().map(gameId => (
                                         <li key={gameId.toString()} className="mb-2 bg-gray-100 p-4 rounded-lg shadow flex flex-row justify-between items-center">

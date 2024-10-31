@@ -68,7 +68,10 @@ export default function TokenInfoBar() {
         console.log('Account\'s Jettons:', balances)
     }
 
-    fetchAccountEvents();
+    useEffect(() => {
+        fetchAccountEvents();
+    }, [userFriendlyAddress]);
+
 
     return (
         <div className={`w-[100%] xl:max-w-[1280px] flex justify-between items-center mx-auto pt-5 px-3`}>

@@ -6,6 +6,7 @@ import { config } from "../lib/wagmi";
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { TonClientProvider } from '@/context/ton-client-context.tsx';
 
 const queryClient = new QueryClient();
 
@@ -27,11 +28,13 @@ export function Providers({ children }) {
       }}
     >
       <TonConnectUIProvider manifestUrl="https://ton-uno.vercel.app/tonconnect-manifest.json">
-        <QueryClientProvider client={queryClient}>
-          <WagmiProvider config={config}>
-            {children}
-          </WagmiProvider>
-        </QueryClientProvider>
+        <TonClientProvider>
+          <QueryClientProvider client={queryClient}>
+            <WagmiProvider config={config}>
+              {children}
+            </WagmiProvider>
+          </QueryClientProvider>
+        </TonClientProvider>
       </TonConnectUIProvider>
     </PrivyProvider>
   );
