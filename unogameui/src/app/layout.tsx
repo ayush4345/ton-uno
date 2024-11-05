@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`bg-cover bg-[url("/bg.jpg")] ${inter.className}`}>
+      <body className={`bg-gradient-to-bl from-[rgba(228,238,255,1)] via-[rgba(185,244,246,1)] to-[rgba(113,143,200,1)] ${inter.className}`}>
         <Providers>
           {children}
         </Providers>

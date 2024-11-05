@@ -19,9 +19,6 @@ import { calculateUsdtAmount } from '@/lib/common-helpers';
 import { JETTON_TRANSFER_GAS_FEES } from '../../../constants/fees.constants';
 import { INVOICE_WALLET_ADDRESS, USDT_MASTER_ADDRESS } from '../../../constants/common-constants';
 import { Address } from '@ton/core';
-import { useLaunchParams } from '@telegram-apps/sdk-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import FooterNavigation from '@/components/FooterNavigation';
 
 const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
 
@@ -36,7 +33,6 @@ export default function PlayGame() {
     const [games, setGames] = useState<BigInt[]>([])
     const router = useRouter()
     const { sender, walletAddress, tonClient } = useTonConnect();
-    const lp = useLaunchParams();
 
     const socket = useRef<Socket | null>(null);
 
@@ -189,50 +185,51 @@ export default function PlayGame() {
     console.log('games', contract)
 
     return (
-        <div className='relative p-3 h-screen flex flex-col justify-between'>
-            <div>
-                <div className='bg-white rounded-2xl flex gap-5 p-3 items-center'>
-                    <span>
-                        <Avatar>
-                            <AvatarImage src={lp.initData?.user?.photoUrl} alt="@user" />
-                            <AvatarFallback>{lp.initData?.user?.firstName.slice(0, 2).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                    </span>
-                    <span>
-                        <div className='font-bold'>{lp.initData?.user?.firstName}</div>
-                        <div className='font-light text-gray-500 text-sm'>Go to profile</div>
-                    </span>
+        <div className='relative'>
+            <TokenInfoBar />
+            <div className='bg-white w-full max-w-[1280px] h-[720px] overflow-hidden mx-auto my-8 px-4 py-2 rounded-lg bg-cover bg-[url("/bg-2.jpg")] relative shadow-[0_0_20px_rgba(0,0,0,0.8)]'>
+                <div className='absolute inset-0 bg-no-repeat bg-[url("/table-1.png")]'></div>
+                <div className='absolute left-8 -right-8 top-14 -bottom-14 bg-no-repeat bg-[url("/dealer.png")] transform-gpu'>
+                    <div className='absolute -left-8 right-8 -top-14 bottom-14 bg-no-repeat bg-[url("/card-0.png")] animate-pulse'></div>
                 </div>
-                {!userFriendlyAddress
-                    ? <div className='relative text-center flex justify-center'>
-                        <img src='/login-button-bg.png' />
-                        <div className='left-1/2 -translate-x-1/2 absolute bottom-4'>
-                            <TonConnectButton />
+                <div className='absolute top-0 md:left-1/2 md:right-0 bottom-0 w-[calc(100%-2rem)] md:w-auto md:pr-20 py-12'>
+                    {!userFriendlyAddress ?
+                        <div className='relative text-center flex justify-center'>
+                            <img src='/login-button-bg.png' />
+                            <div className='left-1/2 -translate-x-1/2 absolute bottom-4'>
+                                {/* <StyledButton disabled={!ready} data-testid="connect" roundedStyle='rounded-full' className='bg-[#ff9000] text-2xl' onClick={login}>{authenticated ? `Connected Wallet` : `Connect Wallet`}</StyledButton> */}
+                                <TonConnectButton />
+                            </div>
                         </div>
-                    </div>
-                    : <div>
-                        <div>
-                            <button className='bg-slate-300 text-black px-6 py-3 rounded-2xl mt-3 font-semibold w-full'>Create game</button>
-                        </div>
-                        <div>
-                            <h2 className='mt-3 font-bold text-3xl'>Games list</h2>
-                            <ScrollArea className='h-[330px] mt-3 rounded-2xl border-2 border-gray-200 bg-white p-4'>
-                                {games.map((gameId, index) => (
-                                    <div key={index} className='bg-white rounded-2xl p-3 mt-3 flex gap-3 items-center justify-around hover:bg-slate-100'>
-                                        <div>
-                                            <span className='font-bold'>Game{" "}</span>
-                                            <span className='font-bold'>{gameId.toString()}</span>
-                                        </div>
-                                        <button className='bg-slate-300 max-w-24 text-black px-4 py-2 rounded-2xl font-semibold w-full'>Join</button>
-                                    </div>
-                                ))}
+                        : <>
+                            <StyledButton onClick={() => handleCompletePayment()} className='w-fit bg-[#00b69a] bottom-4 text-2xl my-3 mx-auto'>{createLoading == true ? 'Creating...' : 'Create Game Room'}</StyledButton>
+                            <p className='text-white text-sm font-mono'>Note: Don't join the room where game is already started</p>
+                            {joinLoading == true && <div className='text-white mt-2 text-2xl shadow-lg'>Wait, while we are joining your game room...</div>}
+                            <h2 className="text-2xl font-bold mb-4 text-white">Active Game Rooms:</h2>
+                            <ScrollArea className="h-[530px] rounded-md border border-gray-200 bg-white p-4">
+                                <ul className="space-y-2">
+                                    {games.toReversed().map(gameId => (
+                                        <li key={gameId.toString()} className="mb-2 bg-gray-100 p-4 rounded-lg shadow flex flex-row justify-between items-center">
+                                            <h2 className="text-xl font-semibold text-gray-800">Game {gameId.toString()}</h2>
+                                            <StyledButton onClick={() => joinGame(gameId)} className='w-fit bg-[#00b69a] bottom-4 text-2xl'>Join Game </StyledButton>
+                                        </li>
+                                    ))}
+                                </ul>
                             </ScrollArea>
+                        </>
+                    }
+                    {/* {"hello" &&
+                        <div className='flex flex-col items-center'>
+                            <StyledButton onClick={() => router.push("/create")} className='w-fit bg-[#00b69a] bottom-4 text-2xl mt-6'>Create Table </StyledButton>
+                            <StyledButton onClick={() => router.push("/game/join")} className='w-fit bg-[#00b69a] bottom-4 text-2xl mt-6'>Join Game </StyledButton>
+                            {loading &&
+                                <div className='text-white mt-2 text-2xl shadow-lg'>
+                                    Wait, while we are retriving your details...
+                                </div>
+                            }
                         </div>
-                    </div>
-                }
-            </div>
-            <div className='w-full'>
-                <FooterNavigation />
+                    } */}
+                </div>
             </div>
         </div >
     )

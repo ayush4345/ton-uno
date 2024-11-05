@@ -5,12 +5,14 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { config } from "../lib/wagmi";
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
+import { TelegramProvider } from './telegramProvider';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { TonClientProvider } from '@/context/ton-client-context.tsx';
 
 const queryClient = new QueryClient();
 
 export function Providers({ children }) {
+
   return (
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
@@ -19,7 +21,7 @@ export function Providers({ children }) {
         appearance: {
           theme: 'light',
           accentColor: '#ed5f1c',
-          logo: 'https://www.TONUNO.xyz/logo.jpg',
+          logo: 'https://www.zkuno.xyz/logo.jpg',
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {
@@ -31,7 +33,9 @@ export function Providers({ children }) {
         <TonClientProvider>
           <QueryClientProvider client={queryClient}>
             <WagmiProvider config={config}>
-              {children}
+              <TelegramProvider>
+                {children}
+              </TelegramProvider>
             </WagmiProvider>
           </QueryClientProvider>
         </TonClientProvider>

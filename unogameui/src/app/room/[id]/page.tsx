@@ -11,7 +11,6 @@ import { io, Socket } from 'socket.io-client'
 import { updateGlobalCardHashMap, getGlobalCardHashMap } from '../../../lib/globalState';
 import StyledButton from '@/components/styled-button'
 import { convertBigIntsToStrings } from '@/lib/gameLogic'
-import { useAccount } from 'wagmi'
 import { Toaster, toast } from 'react-hot-toast'
 import { useTonAddress } from '@tonconnect/ui-react'
 import { decodeBase64ToHex } from '@/lib/utils'
