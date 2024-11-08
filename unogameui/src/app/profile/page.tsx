@@ -4,7 +4,7 @@ import FooterNavigation from '@/components/FooterNavigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useLaunchParams } from '@telegram-apps/sdk-react';
 import { Coins, Users, Trophy, ArrowRight, HelpCircle } from "lucide-react"
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 export default function GameProfile() {
 

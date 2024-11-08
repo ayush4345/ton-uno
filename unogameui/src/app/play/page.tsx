@@ -191,7 +191,7 @@ export default function PlayGame() {
     return (
         <div className='relative p-3 h-screen flex flex-col justify-between'>
             <div>
-                <div className='bg-white rounded-2xl flex gap-5 p-3 items-center'>
+                <div className='bg-white relative rounded-2xl flex gap-5 p-3 items-center'>
                     <span>
                         <Avatar>
                             <AvatarImage src={lp.initData?.user?.photoUrl} alt="@user" />
@@ -202,6 +202,7 @@ export default function PlayGame() {
                         <div className='font-bold'>{lp.initData?.user?.firstName}</div>
                         <div className='font-light text-gray-500 text-sm'>Go to profile</div>
                     </span>
+                    <TonConnectButton className='absolute right-3' />
                 </div>
                 {!userFriendlyAddress
                     ? <div className='relative text-center flex justify-center'>
@@ -212,21 +213,21 @@ export default function PlayGame() {
                     </div>
                     : <div>
                         <div>
-                            <button className='bg-slate-300 text-black px-6 py-3 rounded-2xl mt-3 font-semibold w-full'>Create game</button>
-                        </div>
-                        <div>
-                            <h2 className='mt-3 font-bold text-3xl'>Games list</h2>
-                            <ScrollArea className='h-[330px] mt-3 rounded-2xl border-2 border-gray-200 bg-white p-4'>
+                            <h2 className='mt-3 text-[#000022] font-bold text-3xl'>Games list</h2>
+                            <ScrollArea className='h-[calc(100vh-320px)] mt-3 rounded-2xl border-2 border-[#000022] bg-white p-4'>
                                 {games.map((gameId, index) => (
-                                    <div key={index} className='bg-white rounded-2xl p-3 mt-3 flex gap-3 items-center justify-around hover:bg-slate-100'>
+                                    <div key={index} className='bg-[#000022]/10 rounded-2xl p-3 mt-3 flex gap-3 items-center justify-around hover:bg-[#000022]/20'>
                                         <div>
                                             <span className='font-bold'>Game{" "}</span>
                                             <span className='font-bold'>{gameId.toString()}</span>
                                         </div>
-                                        <button className='bg-slate-300 max-w-24 text-black px-4 py-2 rounded-2xl font-semibold w-full'>Join</button>
+                                        <StyledButton className='bg-[#FF7033] max-w-24'>Join</StyledButton>
                                     </div>
                                 ))}
                             </ScrollArea>
+                        </div>
+                        <div className='flex mt-3'>
+                            <StyledButton className='bg-[#FF7033] w-full'>Create game</StyledButton>
                         </div>
                     </div>
                 }
