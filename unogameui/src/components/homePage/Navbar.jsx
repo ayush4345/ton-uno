@@ -27,7 +27,7 @@ const Navbar = () => {
         <h2 className="font-extrabold text-[24px] leading-[30.24px] text-white">
            TONUNO
         </h2>
-        <StyledButton onClick={() => router.push("/play")} roundedStyle='rounded-full' className='bg-[#33b8e8] text-2xl'>Start Game</StyledButton>
+        <StyledButton onClick={() => router.push("/profile")} roundedStyle='rounded-full' className='bg-[#33b8e8] text-2xl'>Start Game</StyledButton>
       </div>
     </motion.nav>
   )
