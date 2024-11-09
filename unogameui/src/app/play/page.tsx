@@ -3,15 +3,13 @@
 import StyledButton from '@/components/styled-button'
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation';
-import TokenInfoBar from '@/components/TokenBar'
 import { UnoGameContract } from '@/lib/types';
 import { getContractNew } from '@/lib/web3';
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonAddress } from '@tonconnect/ui-react';
-import { ethers } from 'ethers';
-import { decodeBase64ToHex } from '@/lib/utils';
+import { decodeBase64To32Bytes } from '@/lib/utils';
 import { useTonConnect } from '@/hooks/useTonConnect';
 import { JettonMaster } from '@ton/ton';
 import { JettonWallet } from '@/wrappers/jettonWallet';
@@ -121,8 +119,7 @@ export default function PlayGame() {
                 setCreateLoading(true)
                 console.log('Creating game...')
 
-                const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
-                const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+                const bytesFromTonAddress = decodeBase64To32Bytes(userFriendlyAddress as string)
 
                 const tx = await contract.createGame(bytesFromTonAddress as `0x${string}` | undefined)
                 console.log('Transaction hash:', tx.hash)
@@ -149,8 +146,7 @@ export default function PlayGame() {
                 console.log(`Joining game ${gameId.toString()}...`)
                 const gameIdBigint = BigInt(gameId.toString())
 
-                const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
-                const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+                const bytesFromTonAddress = decodeBase64To32Bytes(userFriendlyAddress as string)
 
                 const tx = await contract.joinGame(gameIdBigint, bytesFromTonAddress as `0x${string}` | undefined)
                 console.log('Transaction hash:', tx.hash)
@@ -159,7 +155,7 @@ export default function PlayGame() {
                 setJoinLoading(false)
 
                 console.log('Joined game successfully')
-                router.push(`/room/${gameId.toString()}`)
+                router.push(`test/room/${gameId.toString()}`)
             } catch (error) {
                 console.error('Failed to join game:', error)
             }
@@ -214,20 +210,20 @@ export default function PlayGame() {
                     : <div>
                         <div>
                             <h2 className='mt-3 text-[#000022] font-bold text-3xl'>Games list</h2>
-                            <ScrollArea className='h-[calc(100vh-320px)] mt-3 rounded-2xl border-2 border-[#000022] bg-white p-4'>
-                                {games.map((gameId, index) => (
+                            <ScrollArea className='h-[calc(100vh-320px)] mt-3 rounded-2xl border-[1px] shadow-md border-[#000022] bg-white p-4'>
+                                {games.toReversed().map((gameId, index) => (
                                     <div key={index} className='bg-[#000022]/10 rounded-2xl p-3 mt-3 flex gap-3 items-center justify-around hover:bg-[#000022]/20'>
                                         <div>
                                             <span className='font-bold'>Game{" "}</span>
                                             <span className='font-bold'>{gameId.toString()}</span>
                                         </div>
-                                        <StyledButton className='bg-[#FF7033] max-w-24'>Join</StyledButton>
+                                        <StyledButton onClick={() => joinGame(gameId)} className='bg-[#FF7033] max-w-24'>Join</StyledButton>
                                     </div>
                                 ))}
                             </ScrollArea>
                         </div>
                         <div className='flex mt-3'>
-                            <StyledButton className='bg-[#FF7033] w-full'>Create game</StyledButton>
+                            <StyledButton onClick={() => createGame()} className='bg-[#FF7033] w-full'>{createLoading ? 'Creating...' : 'Create game'}</StyledButton>
                         </div>
                     </div>
                 }

@@ -13,7 +13,7 @@ import StyledButton from '@/components/styled-button'
 import { convertBigIntsToStrings } from '@/lib/gameLogic'
 import { Toaster, toast } from 'react-hot-toast'
 import { useTonAddress } from '@tonconnect/ui-react'
-import { decodeBase64ToHex } from '@/lib/utils'
+import { decodeBase64To32Bytes } from '@/lib/utils'
 import { ethers } from 'ethers'
 
 const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
@@ -39,9 +39,7 @@ const Room: React.FC = () => {
     useEffect(() => {
         if (userFriendlyAddress) {
             
-            const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
-            const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
-            console.log(bytesFromTonAddress)
+            const bytesFromTonAddress = decodeBase64To32Bytes(userFriendlyAddress as string)
 
             accountRef.current = bytesFromTonAddress;
             setAccount(bytesFromTonAddress);
@@ -61,7 +59,7 @@ const Room: React.FC = () => {
             if (id && socket.current) {
                 const roomId = `game-${id}`;
                 socket.current.emit('joinRoom', roomId);
-                console.log(`Joined game room: ${roomId}`);
+                // console.log(`Joined game room: ${roomId}`);
 
                 // Listen for gameStarted event for this specific room
                 socket.current.on(`gameStarted-${roomId}`, (data) => {
@@ -76,7 +74,7 @@ const Room: React.FC = () => {
 
                     // Update player hand
                     if (accountRef.current) {
-                        console.log('Account: ', account)
+                        // console.log('Account: ', account)
                         const playerHandHashes = newState.playerHands[accountRef.current];
                         setPlayerHand(playerHandHashes);
                         storePlayerHand(BigInt(id as string), accountRef.current, playerHandHashes);
@@ -88,7 +86,7 @@ const Room: React.FC = () => {
 
                 // Listen for cardPlayed event
                 socket.current.on(`cardPlayed-${roomId}`, (data) => {
-                    console.log(`Card played event received for room ${roomId}:`, data);
+                    // console.log(`Card played event received for room ${roomId}:`, data);
                     const { action, newState } = data;
 
                     // Update the off-chain game state
@@ -116,11 +114,11 @@ const Room: React.FC = () => {
             if (userFriendlyAddress) {
                 const { contract } = await getContractNew()
                 setContract(contract)
-                console.log('Account: ', userFriendlyAddress, 'contract: ', contract)
+                // console.log('Account: ', userFriendlyAddress, 'contract: ', contract)
                 if (contract && id && account) {
                     const bigIntId = BigInt(id as string)
                     setGameId(bigIntId)
-                    console.log('Game ID: ', bigIntId)
+                    // console.log('Game ID: ', bigIntId)
                     await fetchGameState(contract, bigIntId, account)
                 }
             }
@@ -158,11 +156,11 @@ const Room: React.FC = () => {
                 //offChainGameState.playerHands[player] = playerHand;
                 //if (player === account) {
                 setPlayerHand(playerHand);
-                console.log('Current player hand (hashes):', playerHand);
+                // console.log('Current player hand (hashes):', playerHand);
             }
 
             setOffChainGameState(offChainGameState)
-            console.log('Off chain game state: ', offChainGameState)
+            // console.log('Off chain game state: ', offChainGameState)
 
             const actions = await contract.getGameActions(gameId)
             for (const action of actions) {
@@ -180,6 +178,7 @@ const Room: React.FC = () => {
             setError('Failed to fetch game state. Please try again.')
         }
     }
+    console.log('On Chain Game state: ', offChainGameState)
 
     const handleStartGame = async () => {
         if (!contract || !account || !offChainGameState || !gameId) return
@@ -202,13 +201,11 @@ const Room: React.FC = () => {
             // for (const player of newState.players) {
             //   const playerHandHashes = newState.playerHands[player];
             //   storePlayerHand(gameId, account, playerHandHashes)
-            //   console.log('Player Hands: ', playerHandHashes)
-            //   console.log(`Stored hand for player ${player}:`, playerHandHashes);
+ ;
             // }
             // setOffChainGameState(newState);
             // const currentPlayerHandHashes = newState.playerHands[account];
             // setPlayerHand(currentPlayerHandHashes);
-            // console.log('Current player hand set:', currentPlayerHandHashes);
             //setPlayerHand(getPlayerHand(gameId, account))
 
             const optimisticUpdate = applyActionToOffChainState(newState, action)
@@ -236,6 +233,9 @@ const Room: React.FC = () => {
             // Broadcast the action to all players in the room
             const roomId = `game-${id.toString()}`;
             socket.current.emit('playCard', { roomId, action, newState: convertBigIntsToStrings(newState) });
+
+            // // Fetch latest state after confirmation
+            // await fetchGameState(contract, BigInt(id as string), account)
 
             toast.success('Card played successfully!', { id: toastId })
         } catch (error) {

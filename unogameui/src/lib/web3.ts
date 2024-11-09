@@ -16,7 +16,7 @@ async function verifyContract(provider: ethers.Provider, address: string) {
   if (code === '0x') {
     throw new Error('No contract deployed at the specified address');
   }
-  console.log('Contract verified at address:', address);
+  console.log('Contract verified at address');
 }
 
 export async function getContract(address: string) {
@@ -34,7 +34,7 @@ export async function getContract(address: string) {
       // console.log(address)
 
       //TestNet
-      const contractAddress = '0x75ef141c9cCafD005c788d8a80660E5684bDfAc2'
+      const contractAddress = '0xCC58B63C5536fB2eB78daDfA4E5cBA8B692Da439'
       //Local
       //const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3' 
       if (!contractAddress) {
@@ -71,7 +71,7 @@ export async function getContractNew() {
     const wallet = new ethers.Wallet(KEY, provider);
 
     // TestNet
-    const contractAddress = '0x75ef141c9cCafD005c788d8a80660E5684bDfAc2';
+    const contractAddress = '0xCC58B63C5536fB2eB78daDfA4E5cBA8B692Da439';
     if (!contractAddress) {
       throw new Error('Contract address is not set');
     }
@@ -85,7 +85,7 @@ export async function getContractNew() {
       wallet
     ) as ethers.Contract & UnoGameContract;
 
-    console.log('Contract connected with wallet:', wallet.address);
+    console.log('Contract connected with wallet');
 
     return { contract: gameContract, wallet: wallet.address };
   } catch (error) {
