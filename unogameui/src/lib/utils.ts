@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Function to decode URL-safe Base64 to Hex string
-export function decodeBase64ToHex(base64String: string) {
+export function decodeBase64To32Bytes(base64String: string) {
   // Convert URL-safe Base64 to regular Base64 (replace '-' with '+' and '_' with '/')
   const standardBase64 = base64String.replace(/-/g, '+').replace(/_/g, '/');
 
@@ -21,8 +21,9 @@ export function decodeBase64ToHex(base64String: string) {
 
   // hexString = encode72to64(hexString)
   // console.log(hexString)
+  const bytesFromHex = ethers.keccak256(hexString)
 
-  return hexString;
+  return bytesFromHex;
 }
 
 // Function to encode Hex string into URL-safe Base64

@@ -44,7 +44,7 @@ export function createDeck(): Card[] {
     deck.push({ color: 'wild', value: 'wild_draw4' });
   }
   
-  console.log('Cards in deck: ', deck.length);
+  // console.log('Cards in deck: ', deck.length);
   return deck;
 }
 
@@ -66,7 +66,7 @@ export function shuffleDeck(deck: Card[], seed: number): Card[] {
     shuffled[currentIndex] = shuffled[randomIndex];
     shuffled[randomIndex] = temporaryValue;
   }
-  console.log('Card count shuffled deck: ', shuffled.length);
+  // console.log('Card count shuffled deck: ', shuffled.length);
   return shuffled;
 }
 
@@ -107,11 +107,11 @@ export function convertBigIntsToStrings(obj: any): any {
   return obj;
 }
 
-export function startGame(state: OffChainGameState, socket?: MutableRefObject<any>): OffChainGameState {
+export function startGame(state: OffChainGameState, socket?: any): OffChainGameState {
   const newState = { ...state };
   deck = shuffleDeck(createDeck(), Number(state.id));
-  console.log(deck)
-  console.log(deck.length)
+  // console.log(deck)
+  // console.log(deck.length)
   let tempCardHashMap: Map<string, Card> = new Map();
   tempCardHashMap.clear()
 
@@ -119,7 +119,7 @@ export function startGame(state: OffChainGameState, socket?: MutableRefObject<an
     const hash = hashCard(card);
     tempCardHashMap.set(hash, card);
   });
-  console.log('Temp Card Deck Size: ',tempCardHashMap.size)
+  // console.log('Temp Card Deck Size: ',tempCardHashMap.size)
   // Update the global cardHashMap
   updateGlobalCardHashMap(Object.fromEntries(tempCardHashMap));
   // Deal hands
@@ -134,7 +134,7 @@ export function startGame(state: OffChainGameState, socket?: MutableRefObject<an
     });
     newState.playerHandsHash[player] = hashCards(hand);
     newState.playerHands[player] = handHashes;
-    console.log(`Player ${player} hand: `, handHashes)
+    // console.log(`Player ${player} hand: `, handHashes)
   });
 
   // Set up discard pile
@@ -155,11 +155,11 @@ export function startGame(state: OffChainGameState, socket?: MutableRefObject<an
   newState.isStarted = true;
   newState.stateHash = hashState(newState);
 
-  if (socket && socket.current) {
+  if (socket) {
     const cardHashMapObject = Object.fromEntries(getGlobalCardHashMap());
     const roomId = `game-${state.id.toString()}`;
 
-    socket.current.emit('gameStarted', {
+    socket.emit('gameStarted', {
       newState: convertBigIntsToStrings(newState),
       cardHashMap: cardHashMapObject,
       roomId: roomId
@@ -360,7 +360,7 @@ function decryptHand(encryptedHand: string, gameId: bigint, playerAddress: strin
   const key = `${gameId}_${playerAddress}`;
   const bytes = CryptoJS.AES.decrypt(encryptedHand, key);
   const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-  console.log('Decrypted string:', decryptedString);
+  // console.log('Decrypted string:', decryptedString);
   if (!decryptedString) {
     console.error('Decryption resulted in an empty string');
     return [];
@@ -385,10 +385,10 @@ export function getPlayerHand(gameId: bigint, playerAddress: string): string[] {
   const key = `game_${gameId}_player_${playerAddress}`;
   const encryptedHand = localStorage.getItem(key);
   if (encryptedHand) {
-    console.log('Retrieved encrypted hand for player:', playerAddress);
+    // console.log('Retrieved encrypted hand for player:', playerAddress);
     return decryptHand(encryptedHand, gameId, playerAddress);
   }
-  console.log('No hand found for player:', playerAddress);
+  // console.log('No hand found for player:', playerAddress);
   return [];
 }
 
@@ -399,9 +399,9 @@ export function getPlayerHandCards(gameId: bigint, playerAddress: string): Card[
 }
 
 export function getCardFromHash(cardHash: string): Card | undefined {
-  console.log('Getting card for hash:', cardHash);
-  console.log('Global cardHashMap:', getGlobalCardHashMap());
+  // console.log('Getting card for hash:', cardHash);
+  // console.log('Global cardHashMap:', getGlobalCardHashMap());
   const card = getCardFromGlobalHashMap(cardHash);
-  console.log('Retrieved card:', card);
+  // console.log('Retrieved card:', card);
   return card;
 }

@@ -10,8 +10,7 @@ import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonAddress } from '@tonconnect/ui-react';
-import { ethers } from 'ethers';
-import { decodeBase64ToHex } from '@/lib/utils';
+import { decodeBase64To32Bytes } from '@/lib/utils';
 import { useTonConnect } from '@/hooks/useTonConnect';
 import { JettonMaster } from '@ton/ton';
 import { JettonWallet } from '@/wrappers/jettonWallet';
@@ -117,8 +116,7 @@ export default function PlayGame() {
                 setCreateLoading(true)
                 console.log('Creating game...')
 
-                const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
-                const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+                const bytesFromTonAddress = decodeBase64To32Bytes(userFriendlyAddress as string)
 
                 const tx = await contract.createGame(bytesFromTonAddress as `0x${string}` | undefined)
                 console.log('Transaction hash:', tx.hash)
@@ -145,8 +143,7 @@ export default function PlayGame() {
                 console.log(`Joining game ${gameId.toString()}...`)
                 const gameIdBigint = BigInt(gameId.toString())
 
-                const hexFromTonAddress = decodeBase64ToHex(userFriendlyAddress as string)
-                const bytesFromTonAddress = ethers.keccak256(hexFromTonAddress)
+                const bytesFromTonAddress = decodeBase64To32Bytes(userFriendlyAddress as string)
 
                 const tx = await contract.joinGame(gameIdBigint, bytesFromTonAddress as `0x${string}` | undefined)
                 console.log('Transaction hash:', tx.hash)
