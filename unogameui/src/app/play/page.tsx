@@ -42,7 +42,7 @@ export default function PlayGame() {
         if (contract) {
             try {
                 console.log('Fetching active games...')
-                const activeGames = await contract.getActiveGames()
+                const activeGames = await contract.getNotStartedGames()
                 console.log('Active games:', activeGames)
                 setGames(activeGames)
             } catch (error) {
