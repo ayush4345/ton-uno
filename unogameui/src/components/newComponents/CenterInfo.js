@@ -5,7 +5,7 @@ const CenterInfo = ({ msg }) => {
     <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
       <h1 className='topInfoText font-bold text-white'>{msg}</h1>
       <br />
-      <a href='/'>
+      <a href='/play'>
         <button className='game-button red'>QUIT</button>
       </a>
     </div>
