@@ -35,7 +35,7 @@ function RootInner({ children }: PropsWithChildren) {
   return (
     <>
       {children}
-      <BackButton path="/" />
+      <BackButton path="/play" />
     </>
   );
 }

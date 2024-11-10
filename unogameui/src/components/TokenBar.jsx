@@ -75,7 +75,7 @@ export default function TokenInfoBar() {
 
     return (
         <div className={`w-[100%] xl:max-w-[1280px] flex justify-between items-center mx-auto pt-5 px-3`}>
-            <Link href="/">
+            <Link href="/play">
                 <h2 className="font-extrabold text-[24px] text-white cursor-pointer">
                     TONUNO
                 </h2>

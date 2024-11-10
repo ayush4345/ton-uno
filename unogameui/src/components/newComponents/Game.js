@@ -1,11 +1,12 @@
-import React, {useEffect, useReducer} from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import socket from "../../services/socket";
 import MemoizedHeader from "./Header";
 import CenterInfo from "./CenterInfo";
 import GameScreen from "./GameScreen";
-import {PACK_OF_CARDS, ACTION_CARDS} from "../../util/packOfCards";
+import { PACK_OF_CARDS, ACTION_CARDS } from "../../util/packOfCards";
 import shuffleArray from "../../util/shuffleArray";
-import {useSoundProvider} from "../../context/SoundProvider";
+import { useSoundProvider } from "../../context/SoundProvider";
+import ColourDialog from "./colourDialog";
 
 //NUMBER CODES FOR ACTION CARDS
 //SKIP - 100
@@ -35,10 +36,15 @@ const initialGameState = {
   drawButtonPressed: false,
 };
 
-const gameReducer = (state, action) => ({...state, ...action});
+const gameReducer = (state, action) => ({ ...state, ...action });
 
-const Game = ({room, currentUser}) => {
+const Game = ({ room, currentUser }) => {
   const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogCallback, setDialogCallback] = useState(null);
+
+  console.log(isDialogOpen)
 
   const {
     gameOver,
@@ -124,14 +130,14 @@ const Game = ({room, currentUser}) => {
         playedCardsPile,
         drawCardPile,
       }) => {
-        dispatch({type: "SET_GAME_OVER", gameOver});
-        dispatch({type: "SET_TURN", turn});
-        dispatch({type: "SET_PLAYER1_DECK", player1Deck});
-        dispatch({type: "SET_PLAYER2_DECK", player2Deck});
-        dispatch({type: "SET_CURRENT_COLOR", currentColor});
-        dispatch({type: "SET_CURRENT_NUMBER", currentNumber});
-        dispatch({type: "SET_PLAYED_CARDS_PILE", playedCardsPile});
-        dispatch({type: "SET_DRAW_CARD_PILE", drawCardPile});
+        dispatch({ type: "SET_GAME_OVER", gameOver });
+        dispatch({ type: "SET_TURN", turn });
+        dispatch({ type: "SET_PLAYER1_DECK", player1Deck });
+        dispatch({ type: "SET_PLAYER2_DECK", player2Deck });
+        dispatch({ type: "SET_CURRENT_COLOR", currentColor });
+        dispatch({ type: "SET_CURRENT_NUMBER", currentNumber });
+        dispatch({ type: "SET_PLAYED_CARDS_PILE", playedCardsPile });
+        dispatch({ type: "SET_DRAW_CARD_PILE", drawCardPile });
         playShufflingSound();
       }
     );
@@ -150,20 +156,20 @@ const Game = ({room, currentUser}) => {
         drawCardPile,
         drawButtonPressed = false,
       }) => {
-        gameOver && dispatch({type: "SET_GAME_OVER", gameOver});
+        gameOver && dispatch({ type: "SET_GAME_OVER", gameOver });
         gameOver && playGameOverSound();
-        winner && dispatch({type: "SET_WINNER", winner});
+        winner && dispatch({ type: "SET_WINNER", winner });
         //check for special card and play their sound else play regular sound
         currentNumber in playSoundMap ? playSoundMap[currentNumber]() : playCardPlayedSound();
-        turn && dispatch({type: "SET_TURN", turn});
-        player1Deck && dispatch({type: "SET_PLAYER1_DECK", player1Deck});
-        player2Deck && dispatch({type: "SET_PLAYER2_DECK", player2Deck});
-        currentColor && dispatch({type: "SET_CURRENT_COLOR", currentColor});
-        currentNumber && dispatch({type: "SET_CURRENT_NUMBER", currentNumber});
-        playedCardsPile && dispatch({type: "SET_PLAYED_CARDS_PILE", playedCardsPile});
-        drawCardPile && dispatch({type: "SET_DRAW_CARD_PILE", drawCardPile});
-        dispatch({type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false});
-        dispatch({type: "SET_DRAW_BUTTON_PRESSED", drawButtonPressed});
+        turn && dispatch({ type: "SET_TURN", turn });
+        player1Deck && dispatch({ type: "SET_PLAYER1_DECK", player1Deck });
+        player2Deck && dispatch({ type: "SET_PLAYER2_DECK", player2Deck });
+        currentColor && dispatch({ type: "SET_CURRENT_COLOR", currentColor });
+        currentNumber && dispatch({ type: "SET_CURRENT_NUMBER", currentNumber });
+        playedCardsPile && dispatch({ type: "SET_PLAYED_CARDS_PILE", playedCardsPile });
+        drawCardPile && dispatch({ type: "SET_DRAW_CARD_PILE", drawCardPile });
+        dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false });
+        dispatch({ type: "SET_DRAW_BUTTON_PRESSED", drawButtonPressed });
       }
     );
   }, []);
@@ -291,29 +297,40 @@ const Game = ({room, currentUser}) => {
         break;
       }
       //if card played was a wild card
-      case "W": {
-        //ask for new color
-        const colorOfPlayedCard = prompt("Enter first letter of new color (r/g/b/y)")?.toUpperCase();
-        if (!colorOfPlayedCard) return;
-
-        cardPlayedByPlayer({cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard: 500});
-        break;
-      }
+      case "W":
+      case "D4W":
+        {
+          //ask for new color
+          setIsDialogOpen(true);
+          setDialogCallback(() => (colorOfPlayedCard) => {
+            if (!colorOfPlayedCard) return;
+            const cardDetails = {
+              cardPlayedBy,
+              played_card,
+              colorOfPlayedCard,
+              numberOfPlayedCard: played_card === 'W' ? 500 : 400,
+              isDraw4: played_card === 'D4W',
+              toggleTurn: played_card !== 'D4W',
+            };
+            cardPlayedByPlayer(cardDetails);
+          });
+          break;
+        }
       //if card played was a draw four wild card
-      case "D4W": {
-        //ask for new color
-        const colorOfPlayedCard = prompt("Enter first letter of new color (r/g/b/y)")?.toUpperCase();
-        if (!colorOfPlayedCard) return;
-        cardPlayedByPlayer({
-          cardPlayedBy,
-          played_card,
-          colorOfPlayedCard,
-          numberOfPlayedCard: 400,
-          isDraw4: true,
-          toggleTurn: false,
-        });
-        break;
-      }
+      // case "D4W": {
+      //   //ask for new color
+      //   const colorOfPlayedCard = prompt("Enter first letter of new color (r/g/b/y)")?.toUpperCase();
+      //   if (!colorOfPlayedCard) return;
+      //   cardPlayedByPlayer({
+      //     cardPlayedBy,
+      //     played_card,
+      //     colorOfPlayedCard,
+      //     numberOfPlayedCard: 400,
+      //     isDraw4: true,
+      //     toggleTurn: false,
+      //   });
+      //   break;
+      // }
       default: {
         //extract number and color of played card
         const numberOfPlayedCard = played_card.charAt(0);
@@ -321,7 +338,7 @@ const Game = ({room, currentUser}) => {
 
         //check for color match or number match
         if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
-          cardPlayedByPlayer({cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard});
+          cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard });
         }
         //if no color or number match, invalid move - do not update state
         else {
@@ -330,6 +347,13 @@ const Game = ({room, currentUser}) => {
         break;
       }
     }
+  };
+
+  const handleDialogSubmit = (colorOfPlayedCard) => {
+    if (dialogCallback) {
+      dialogCallback(colorOfPlayedCard);
+    }
+    setIsDialogOpen(false);
   };
 
   const onCardDrawnHandler = () => {
@@ -389,21 +413,30 @@ const Game = ({room, currentUser}) => {
     <div className={`backgroundColor${currentColor}`}>
       <MemoizedHeader roomCode={room} />
       {!gameOver ? (
-        <GameScreen
-          currentUser={currentUser}
-          turn={turn}
-          player1Deck={player1Deck}
-          player2Deck={player2Deck}
-          onCardDrawnHandler={onCardDrawnHandler}
-          onCardPlayedHandler={onCardPlayedHandler}
-          playedCardsPile={playedCardsPile}
-          drawButtonPressed={drawButtonPressed}
-          onSkipButtonHandler={onSkipButtonHandler}
-          onUnoClicked={() => {
-            playUnoSound();
-            dispatch({type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: !isUnoButtonPressed});
-          }}
-        />
+        <>
+          <GameScreen
+            currentUser={currentUser}
+            turn={turn}
+            player1Deck={player1Deck}
+            player2Deck={player2Deck}
+            onCardDrawnHandler={onCardDrawnHandler}
+            onCardPlayedHandler={onCardPlayedHandler}
+            playedCardsPile={playedCardsPile}
+            drawButtonPressed={drawButtonPressed}
+            onSkipButtonHandler={onSkipButtonHandler}
+            onUnoClicked={() => {
+              playUnoSound();
+              dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: !isUnoButtonPressed });
+            }}
+          />
+          {isDialogOpen && (
+            <ColourDialog
+              onSubmit={handleDialogSubmit}
+              onClose={() => setIsDialogOpen(false)}
+              isDialogOpen={isDialogOpen}
+            />
+          )}
+        </>
       ) : (
         <CenterInfo msg={`Game Over: ${winner} wins!!`} />
       )}
