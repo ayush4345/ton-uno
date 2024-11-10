@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 /**
  * Component which controls the Back Button visibility.
  */
-export function BackButton({ path = "/" }: { path: string }) {
+export function BackButton({ path = "/play" }: { path: string }) {
     const isVisible = useSignal(backButton.isVisible);
     const router = useRouter()
 
@@ -21,7 +21,7 @@ export function BackButton({ path = "/" }: { path: string }) {
     }, []);
 
     useEffect(() => {
-        const back = () => router.replace("path")
+        const back = () => router.replace(path)
 
         backButton.onClick(back)
 

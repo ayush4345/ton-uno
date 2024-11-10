@@ -185,7 +185,7 @@ contract UnoGame is ReentrancyGuard {
 
         for (uint256 i = 0; i < _activeGames.length; i++) {
             uint256 gameId = _activeGames[i];
-            if (!games[gameId].isStarted) {
+            if (!games[gameId].isStarted && games[gameId].players.length < 3) {
                 notStartedGames[count] = gameId;
                 count++;
             }
