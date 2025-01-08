@@ -21,7 +21,7 @@ import { useLaunchParams } from '@telegram-apps/sdk-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import FooterNavigation from '@/components/FooterNavigation';
 
-const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://unosocket-6k6gsdlfoa-el.a.run.app/';
+const CONNECTION = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'https://tonunosocket-6k6gsdlfoa-el.a.run.app/';
 
 export default function PlayGame() {
 
@@ -107,7 +107,9 @@ export default function PlayGame() {
             });
 
             console.log(`See transaction at https://testnet.tonviewer.com/${usersUsdtAddress.toString()}`);
-            createGame();
+
+            await createGame();
+            
         } catch (error) {
             console.log('Error during transaction check:', error);
         }
