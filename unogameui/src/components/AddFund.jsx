@@ -44,8 +44,8 @@ export default function AddFundPopUp({ openHandler, address, balance, setBalance
 
     const [tokenAmount, setTokenAmount] = useState(0);
 
+    // swap 1 TON to Enertime but not less than 0.1 nano Enertime
     const swapTonToEnertime = async () => {
-        // swap 1 TON to Enertime but not less than 0.1 nano Enertime
         const txParams = await dex.getSwapTonToJettonTxParams({
             offerAmount: toNano("1"), // swap 1 TON
             askJettonAddress: "EQAWqZE17MQgawh-Jo_Z8Wh_dGc1zpo7rL6r2w4L7XK_HygW", // Enertime
@@ -110,7 +110,7 @@ export default function AddFundPopUp({ openHandler, address, balance, setBalance
                     {balance && balance.map((item, index) => {
                         return (
                             <div key={index} className='flex flex-col items-center'>
-                                <img src={`/chips-blank-${index+1}.png`} data-value={item} />
+                                <img src={`/chips-blank-${index + 1}.png`} data-value={item} />
                                 <p>$ {item.balance / 1_000_000_000}</p>
                                 <p>{item.jetton.name}</p>
                             </div>
@@ -118,24 +118,6 @@ export default function AddFundPopUp({ openHandler, address, balance, setBalance
                     })}
                 </section>
                 <StyledButton onClick={swapTonToEnertime}>Swap Ton to Enertime</StyledButton>
-                {/* <div className='flex bg-black/20 justify-between items-center text-white font-semibold rounded-lg' style={{ padding: "10px 20px" }}>
-                    <div className='bg-black/30 rounded-lg flex items-center justify-between' style={{ padding: "5px 20px", width: "66%" }}><span>{amount}</span> {amount != 0 && <button onClick={() => setAmount(0)}><RxCross2 /></button>}</div>
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <StyledButton onClick={swapTonToEnertime}>Buy Token</StyledButton>
-                        </DialogTrigger>
-                        <DialogContent className="w-fit">
-                            <DialogHeader>
-                                <DialogTitle>Success 🎉</DialogTitle>
-                                <DialogDescription className="text-lg">
-                                    <img className='m-auto animate-bounce' src="/avatar-robot.png" />
-                                    Your Token have been successfully added to your Balance
-                                </DialogDescription>
-                            </DialogHeader>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-                <div className='mt-2 text-gray-200'>select tokens you want to buy</div> */}
             </div>
         </FrameBox>
     )
