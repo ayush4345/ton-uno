@@ -7,6 +7,17 @@ import React, { useState } from 'react';
 import { TonClient, toNano } from "@ton/ton";
 import { DEX, pTON } from "@ston-fi/sdk";
 import StyledButton from '@/components/styled-button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 const client = new TonClient({
     endpoint: "https://toncenter.com/api/v2/jsonRPC",
@@ -19,11 +30,12 @@ const CoinList: React.FC = () => {
     const [jettons, setJettons] = useState<any[]>([])
     const userFriendlyAddress = useTonAddress();
     const [tonConnectUI] = useTonConnectUI();
+    const [tonAmount, setTonAmount] = useState("1")
 
     // swap 1 TON to Enertime but not less than 0.1 nano Enertime
     const swapTonToEnertime = async () => {
         const txParams = await dex.getSwapTonToJettonTxParams({
-            offerAmount: toNano("1"), // swap 1 TON
+            offerAmount: toNano(tonAmount), // swap 1 TON
             askJettonAddress: "EQAWqZE17MQgawh-Jo_Z8Wh_dGc1zpo7rL6r2w4L7XK_HygW", // Enertime
             minAskAmount: toNano("0.1"), // but not less than 0.1 STON
             proxyTon: new pTON.v1(),
@@ -85,7 +97,35 @@ const CoinList: React.FC = () => {
                             0.00
                             <span className="text-2xl ml-2 text-gray-600 dark:text-gray-400">Enertime</span>
                         </div>
-                        <StyledButton style={{width:"100%"}} onClick={swapTonToEnertime}>Swap Ton to Enertime</StyledButton>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <StyledButton style={{ width: "100%" }}>Swap Ton to Enertime</StyledButton>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px] rounded-lg">
+                                <DialogHeader>
+                                    <DialogTitle>Swap Token</DialogTitle>
+                                    <DialogDescription>
+                                        Enter ton amount to swap using STON.fi
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="name" className="text-right">
+                                            Amount
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            defaultValue={tonAmount}
+                                            className="col-span-3"
+                                            onChange={(e) => setTonAmount(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                <StyledButton style={{ width: "100%" }} onClick={swapTonToEnertime}>Continue</StyledButton>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
                 {userFriendlyAddress
